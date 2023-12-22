@@ -1,35 +1,39 @@
 # Step 1: Create a New User
 First, create a new user named 'bizzycs' for running the CS2 server:
 
-Open a terminal and enter:
+Open an ssh [terminal](https://www.putty.org/) as a sudo user and enter:
 ```
 sudo adduser bizzycs
 sudo adduser bizzycs sudo
 ```
-
 Follow the prompts to set up the new user. You can leave some fields blank if you want.
 
 # Step 2: Install SteamCMD and CS2
-Next, we install SteamCMD, which is a command-line version of the Steam client.
-CS2 is the game we will be installing, as id 730.
+Next, we will install SteamCMD, which is a command-line version of the Steam client.
+We will next install CS2. First we set the location of where we want it, then we install via [id 730](https://developer.valvesoftware.com/wiki/Steam_Application_IDs).
 
 Update your package lists:
 ```
 sudo apt update
 ```
 
-Install prereqs (out-dated):
+Install prereqs (_deprecated_):
 ```
-dpkg --add-architecture i386 # enable multi-arch
+dpkg --add-architecture i386
 apt-get upgrade
-apt-get install libc6:i386 # install base 32bit libraries
+apt-get install libc6:i386
 apt-get install lib32z1
 apt-get install screen
 ```
 
-Install SteamCMD:
+Switch New User:
 ```
 login
+```
+>Or just close your terminal and reconnect using new bizzycs user!
+
+Install SteamCMD:
+```
 wget http://media.steampowered.com/installer/steamcmd_linux.tar.gz
 tar -xvzf steamcmd_linux.tar.gz
 ./steamcmd.sh
@@ -39,26 +43,23 @@ app_update 730 validate
 quit
 ```
 
-# Step 3: Set Up and Configure the CS2 Server
-Make sure you switch to bizzycs user and set up the CS2 server.
-Or log off and log back into bizzycs, but make sure you're at the root. /home/bizzycs
+# Step 3: Configure CS2 Server
+Make sure your on the bizzycs user and at the right location (can use pwd) at: /home/bizzycs 
 
-Switch to the bizzycs user if needed:
+If still on another user or root, switch to the bizzycs user:
 ```
 su - bizzycs
 ```
-Create and configure the server.cfg file in the server directory.
 
+# Step 4: Create and Configure the server.cfg
 Navigate to the CS2 server configuration directory:
 ```
 cd /home/bizzycs/Steam/steamapps/common/cs2/game/csgo/cfg
 ```
-
 Copy the server.cfg from this repo or create your own using a text editor like nano:
 ```
 nano server.cfg
 ```
-
 Add your server configurations (hostname, rcon password, etc.) to this file.
 
 # Step 5: Start the Server
@@ -94,8 +95,15 @@ Remember to configure any firewalls or network settings to allow traffic on the 
 ```
 sudo ufw allow from any to any port 27015 proto tcp
 sudo ufw allow from any to any port 27015 proto udp
-sudo ufw allow from any to any port 27020 proto tcp
-sudo ufw allow from any to any port 27020 proto udp
 ```
+
+# Additonal Resources
+[Valve CS2 Dedicated Server Wiki](https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers)
+[Valve Command line Options](https://developer.valvesoftware.com/wiki/Command_line_options)
+[CS2 RCON Tool](https://github.com/fpaezf/CS2-RCON-Tool-V2)
+[AlliedModders](https://forums.alliedmods.net/)
+[AlliedModders CS2 Server Linux Thread](https://forums.alliedmods.net/showthread.php?t=344056)
+[Reddit Guide](https://www.reddit.com/r/cs2/comments/16vto3o/guide_to_running_a_dedicated_server_on_linux/)
+[Docker Image](https://hub.docker.com/r/joedwards32/cs2)
 
 >And yo! Please regularly back up your server configuration and other important files.
