@@ -1,19 +1,78 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
 
-trigger:
-- main
+trigger: none
 
 pool:
-  vmImage: ubuntu-latest
+  name: Local Agents
+
+variables:
+- group: cs2-release-vars
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- checkout: self
+- bash: |
+    # Step 1: Create User
+    sudo adduser $(USER_NAME)
+    sudo adduser $(USER_NAME) sudo
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  displayName: 'Create New User'
+
+- bash: |
+    # Copy logs to another path
+    cp -r /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/logs/* /home/$(USER_NAME)/bizzylogs/
+  displayName: 'Copy Logs'
+  continueOnError: true
+
+- bash: |
+    # Step 2: Install SteamCMD and CS2
+    sudo apt update
+    dpkg --add-architecture i386
+    apt-get upgrade
+    apt-get install libc6:i386 lib32z1 screen
+    wget $(STEAMCMD_LOC)
+    tar -xvzf steamcmd_linux.tar.gz
+    ./steamcmd.sh
+    force_install_dir ./$(INSTALL_DIR)
+    login anonymous
+    app_update 730 validate
+    quit
+
+  displayName: 'Install SteamCMD and CS2'
+
+- bash: |
+    # Step 4: Create and Configure server.cfg
+    cd /home/$(USER_NAME)/Steam/steamapps/common/cs2/game/csgo/cfg
+    cp $(Build.SourcesDirectory)/server.cfg server.cfg
+
+  displayName: 'Create and Configure server.cfg'
+
+- bash: |
+    # Step 5: Start the Server
+    cd /home/$(USER_NAME)/Steam/steamapps/common/cs2/game/bin/linuxsteamrt64
+    ./cs2 -dedicated +map cs_office +sv_setsteamaccount $(GSLT_TOKEN) +maxplayers 20 +sv_lan 0 +sv_cheats 0
+
+  displayName: 'Start the Server'
+
+- bash: |
+    # Step 6: Maintain and Update the Server
+    cd /home/$(USER_NAME)
+    ./steamcmd.sh +login anonymous +force_install_dir /home/$(USER_NAME)/Steam/steamapps/common/cs2 +app_update 730 validate +quit
+
+  displayName: 'Update the Server'
+
+
+
+- bash: |
+    # Delete CS2 folder
+    rm -rf /path/to/cs2/folder
+    # Reinstall CS2
+    # Add reinstall commands here
+
+  displayName: 'Reinstall CS2'
+
+- bash: |
+    # Additional firewall settings
+    sudo ufw allow from any to any port 27015 proto tcp
+    sudo ufw allow from any to any port 27015 proto udp
+
+  displayName: 'Configure Firewall'
+
