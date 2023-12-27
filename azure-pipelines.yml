@@ -51,7 +51,7 @@ steps:
   displayName: "Replace tokens"
 
 - task: SSH@0
-  displayName: 'Copy Logs via SSH'
+  displayName: 'Copy Logs'
   inputs:
     sshEndpoint: 'bizzycs'
     runOptions: 'inline'
@@ -60,19 +60,26 @@ steps:
     interactiveSession: true
     readyTimeout: '20000'
 
+- task: CopyFilesOverSSH@0
+  displayName: 'Copy src2ds1 to Remote Server'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: 'src2ds1'
+    targetFolder: '/etc/init.d/'
+
 - task: SSH@0
-  displayName: 'Copy over src2ds1 via SSH'
+  displayName: 'Set Permissions on src2ds1'
   inputs:
     sshEndpoint: 'bizzycs'
     runOptions: 'inline'
     inline: |
-      sudo cp $(Build.SourcesDirectory)/src2ds1 /etc/init.d/src2ds1
       sudo chmod +x /etc/init.d/src2ds1
     interactiveSession: true
     readyTimeout: '20000'
 
 - task: SSH@0
-  displayName: 'Stop CS2 Server via SSH'
+  displayName: 'Stop CS2 Server'
   inputs:
     sshEndpoint: 'bizzycs'
     runOptions: 'inline'
@@ -113,16 +120,13 @@ steps:
     interactiveSession: true
     readyTimeout: '20000'
 
-- task: SSH@0
-  displayName: 'Copy server.cfg via SSH'
+- task: CopyFilesOverSSH@0
+  displayName: 'Copy server.cfg to Remote Server'
   inputs:
     sshEndpoint: 'bizzycs'
-    runOptions: 'inline'
-    inline: |
-      cd /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/cfg
-      sudo cp $(Build.SourcesDirectory)/server.cfg server.cfg --force
-    interactiveSession: true
-    readyTimeout: '20000'
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: 'server.cfg'
+    targetFolder: '/home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/cfg'
 
 - task: SSH@0
   displayName: 'Update Permissions via SSH'
