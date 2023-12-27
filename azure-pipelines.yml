@@ -78,5 +78,9 @@ steps:
   displayName: 'Copy server.cfg'
 
 - bash: |
+    sudo chmod -R 777 /home/$(USER_NAME)/$(INSTALL_DIR)
+  displayName: 'Update Permissions'
+
+- bash: |
     /etc/init.d/src2ds1 start
   displayName: 'Start the Server'
