@@ -20,6 +20,23 @@ steps:
     sudo ufw allow from any to any port $(SERVER_PORT) proto udp
   displayName: 'Configure Firewall'
 
+- task: replacetokens@5
+  inputs:
+    targetFiles: |
+      **/*.cfg
+      src2ds1
+    encoding: 'auto'
+    tokenPattern: 'default'
+    writeBOM: true
+    actionOnMissing: 'warn'
+    keepToken: false
+    actionOnNoFiles: 'continue'
+    enableTransforms: false
+    enableRecursion: false
+    useLegacyPattern: false
+    enableTelemetry: true
+  displayName: "Replace tokens"
+
 - bash: |
     sudo cp -r /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/logs/* /home/$(USER_NAME)/bizzylogs/
   displayName: 'Copy Logs'
@@ -39,19 +56,6 @@ steps:
     sudo rm -rf /home/$(USER_NAME)/$(INSTALL_DIR)
   displayName: 'Delete CS2'
 
-- task: replacetokens@5
-  inputs:
-    targetFiles: '**/*.cfg'
-    encoding: 'auto'
-    tokenPattern: 'default'
-    writeBOM: true
-    actionOnMissing: 'warn'
-    keepToken: false
-    actionOnNoFiles: 'continue'
-    enableTransforms: false
-    enableRecursion: false
-    useLegacyPattern: false
-    enableTelemetry: true
 
 - bash: |
     cd /home/$(USER_NAME)
