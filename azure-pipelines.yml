@@ -66,7 +66,17 @@ steps:
     sshEndpoint: 'bizzycs'
     sourceFolder: '$(Build.SourcesDirectory)'
     contents: 'src2ds1'
-    targetFolder: '/etc/init.d/'
+    targetFolder: '/home/$(USER_NAME)'
+
+- task: SSH@0
+  displayName: 'Copy src2ds1'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+       sudo cp -r /home/$(USER_NAME)/src2ds1 /etc/init.d/src2ds1 --force
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Set Permissions on src2ds1'
