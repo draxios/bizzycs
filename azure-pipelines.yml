@@ -56,7 +56,6 @@ steps:
     sudo rm -rf /home/$(USER_NAME)/$(INSTALL_DIR)
   displayName: 'Delete CS2'
 
-
 - bash: |
     cd /home/$(USER_NAME)
     sudo apt update
@@ -79,6 +78,5 @@ steps:
   displayName: 'Copy server.cfg'
 
 - bash: |
-    /etc/init.d/srcds1 start
+    /etc/init.d/src2ds1 start
   displayName: 'Start the Server'
-
