@@ -89,6 +89,17 @@ steps:
     readyTimeout: '20000'
 
 - task: SSH@0
+  displayName: 'Fix encoding on src2ds1'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      cd /etc/init.d
+      sudo dos2unix src2ds1
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
   displayName: 'Stop CS2 Server'
   inputs:
     sshEndpoint: 'bizzycs'
