@@ -133,11 +133,9 @@ steps:
       wget $(STEAMCMD_LOC)
       tar -xvzf steamcmd_linux.tar.gz --overwrite
       sudo rm steamcmd_linux.tar.gz 
-      ./steamcmd.sh
-      force_install_dir ./$(INSTALL_DIR)
-      login anonymous
-      app_update 730 validate
-      quit
+      echo Installing...
+      ./steamcmd.sh +force_install_dir $(RemoteTargetFolder) +login anonymous +app_update 730 validate +quit
+      echo Done!
     interactiveSession: true
     readyTimeout: '20000'
 
