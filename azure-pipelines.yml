@@ -134,7 +134,7 @@ steps:
       tar -xvzf steamcmd_linux.tar.gz --overwrite
       sudo rm steamcmd_linux.tar.gz 
       echo Installing...
-      ./steamcmd.sh +force_install_dir $(RemoteTargetFolder) +login anonymous +app_update 730 validate +quit
+      ./steamcmd.sh +force_install_dir ./$(INSTALL_DIR) +login anonymous +app_update 730 validate +quit
       echo Done!
     interactiveSession: true
     readyTimeout: '20000'
@@ -163,6 +163,6 @@ steps:
     sshEndpoint: 'bizzycs'
     runOptions: 'inline'
     inline: |
-      /etc/init.d/src2ds1 start
+      sudo /etc/init.d/src2ds1 start
     interactiveSession: true
     readyTimeout: '20000'
