@@ -19,6 +19,8 @@ steps:
         sudo adduser $(USER_NAME)
         sudo adduser $(USER_NAME) sudo
       fi
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Configure Firewall via SSH'
@@ -28,6 +30,8 @@ steps:
     inline: |
       sudo ufw allow from any to any port $(SERVER_PORT) proto tcp
       sudo ufw allow from any to any port $(SERVER_PORT) proto udp
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: replacetokens@5
   inputs:
@@ -53,6 +57,8 @@ steps:
     runOptions: 'inline'
     inline: |
       sudo cp -r /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/logs/* /home/$(USER_NAME)/bizzylogs/ || true
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Copy over src2ds1 via SSH'
@@ -62,6 +68,8 @@ steps:
     inline: |
       sudo cp $(Build.SourcesDirectory)/src2ds1 /etc/init.d/src2ds1
       sudo chmod +x /etc/init.d/src2ds1
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Stop CS2 Server via SSH'
@@ -70,6 +78,8 @@ steps:
     runOptions: 'inline'
     inline: |
       sudo /etc/init.d/src2ds1 stop
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Delete CS2 via SSH'
@@ -78,6 +88,8 @@ steps:
     runOptions: 'inline'
     inline: |
       sudo rm -rf /home/$(USER_NAME)/$(INSTALL_DIR)
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Install SteamCMD and CS2 via SSH'
@@ -98,6 +110,8 @@ steps:
       login anonymous
       app_update 730 validate
       quit
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Copy server.cfg via SSH'
@@ -107,6 +121,8 @@ steps:
     inline: |
       cd /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/cfg
       sudo cp $(Build.SourcesDirectory)/server.cfg server.cfg --force
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Update Permissions via SSH'
@@ -115,6 +131,8 @@ steps:
     runOptions: 'inline'
     inline: |
       sudo chmod -R 750 /home/$(USER_NAME)/$(INSTALL_DIR)
+    interactiveSession: true
+    readyTimeout: '20000'
 
 - task: SSH@0
   displayName: 'Start the Server via SSH'
@@ -123,3 +141,5 @@ steps:
     runOptions: 'inline'
     inline: |
       /etc/init.d/src2ds1 start
+    interactiveSession: true
+    readyTimeout: '20000'
