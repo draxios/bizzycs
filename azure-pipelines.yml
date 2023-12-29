@@ -1,0 +1,168 @@
+trigger: none
+
+pool:
+  name: Local Agents
+
+variables:
+- group: cs2-release-vars
+
+steps:
+- checkout: self
+
+- task: SSH@0
+  displayName: 'Create New User via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      if ! id "$(USER_NAME)" &>/dev/null; then
+        sudo adduser $(USER_NAME)
+        sudo adduser $(USER_NAME) sudo
+      fi
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Configure Firewall via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo ufw allow from any to any port $(SERVER_PORT) proto tcp
+      sudo ufw allow from any to any port $(SERVER_PORT) proto udp
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: replacetokens@5
+  inputs:
+    targetFiles: |
+      **/*.cfg
+      src2ds1
+    encoding: 'auto'
+    tokenPattern: 'default'
+    writeBOM: true
+    actionOnMissing: 'warn'
+    keepToken: false
+    actionOnNoFiles: 'continue'
+    enableTransforms: false
+    enableRecursion: false
+    useLegacyPattern: false
+    enableTelemetry: true
+  displayName: "Replace tokens"
+
+- task: SSH@0
+  displayName: 'Copy Logs'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo cp -r /home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/logs/* /home/$(USER_NAME)/bizzylogs/ || true
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: CopyFilesOverSSH@0
+  displayName: 'Copy src2ds1 to Remote Server'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: 'src2ds1'
+    targetFolder: '/home/$(USER_NAME)'
+
+- task: SSH@0
+  displayName: 'Copy src2ds1'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+       sudo cp -r /home/$(USER_NAME)/src2ds1 /etc/init.d/src2ds1 --force
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Set Permissions on src2ds1'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo chmod +x /etc/init.d/src2ds1
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Fix encoding on src2ds1'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      cd /etc/init.d
+      sudo dos2unix src2ds1
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Stop CS2 Server'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo /etc/init.d/src2ds1 stop
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Delete CS2 via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo rm -rf /home/$(USER_NAME)/$(INSTALL_DIR)
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Install SteamCMD and CS2 via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      cd /home/$(USER_NAME)
+      sudo apt update
+      sudo dpkg --add-architecture i386
+      sudo apt-get upgrade
+      sudo apt-get install libc6:i386 lib32z1 screen
+      wget $(STEAMCMD_LOC)
+      tar -xvzf steamcmd_linux.tar.gz --overwrite
+      sudo rm steamcmd_linux.tar.gz 
+      echo Installing...
+      ./steamcmd.sh +force_install_dir ./$(INSTALL_DIR) +login anonymous +app_update 730 validate +quit
+      echo Done!
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: CopyFilesOverSSH@0
+  displayName: 'Copy server.cfg to Remote Server'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: 'server.cfg'
+    targetFolder: '/home/$(USER_NAME)/$(INSTALL_DIR)/game/csgo/cfg'
+
+- task: SSH@0
+  displayName: 'Update Permissions via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo chmod -R 750 /home/$(USER_NAME)/$(INSTALL_DIR)
+    interactiveSession: true
+    readyTimeout: '20000'
+
+- task: SSH@0
+  displayName: 'Start the Server via SSH'
+  inputs:
+    sshEndpoint: 'bizzycs'
+    runOptions: 'inline'
+    inline: |
+      sudo /etc/init.d/src2ds1 start
+    interactiveSession: true
+    readyTimeout: '20000'
