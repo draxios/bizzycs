@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/sh
 
 SRCDS_USER="#{USER_NAME}#"
@@ -66,4 +67,74 @@ case "$1" in
 		;;
 esac
 
+=======
+#!/bin/sh
+
+SRCDS_USER="#{USER_NAME}#"
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+DIR=/home/$SRCDS_USER/#{INSTALL_DIR}#/game/bin/linuxsteamrt64
+DAEMON="$DIR/cs2"
+
+IP=#{SERVER_IP}#
+PORT=#{SERVER_PORT}#
+NAME=CS2_Server
+PARAMS="-dedicated +map #{STARTING_MAP}# +sv_setsteamaccount #{GSLT_TOKEN}# +maxplayers #{MAX_PLAYERS}# +sv_lan 0 +sv_cheats 0 -ip $IP -port $PORT"
+DESC="CS2 Dedicated Server on port $PORT"
+
+
+###########################################
+#                                         #
+#           DON'T TOUCH THESE             #
+#                                         #
+###########################################
+
+case "$1" in
+	start)
+		if su $SRCDS_USER -l -c "screen -ls" |grep $NAME; then
+			echo -n "$DESC: $NAME already started!"
+		else
+			echo "Starting $DESC: $NAME"
+			cd $DIR
+			su $SRCDS_USER -l -c "screen -d -m -S $NAME $DAEMON $PARAMS"
+		fi
+		;;
+
+	stop)
+		if su $SRCDS_USER -l -c "screen -ls" |grep $NAME; then
+			echo -n "Stopping $DESC: $NAME"
+			kill `su $SRCDS_USER -l -c "screen -ls" |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			echo " ... done."
+		else
+			echo "Couldn't find a running $DESC"
+		fi
+		;;
+
+	restart)
+		if su $SRCDS_USER -l -c "screen -ls" |grep $NAME; then
+			echo -n "Stopping $DESC: $NAME"
+			kill `su $SRCDS_USER -l -c "screen -ls" |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			echo " ... done."
+		else
+			echo "Couldn't find a running $DESC"
+		fi
+		echo -n "Starting $DESC: $NAME"
+		cd $DIR
+		su $SRCDS_USER -l -c "screen -d -m -S $NAME $DAEMON $PARAMS"
+		echo " ... done."
+		;;
+
+	status)
+		# Check whether there's a "srcds" process
+		ps aux | grep -v grep | grep cs2 > /dev/null
+		CHECK=$?
+		[ $CHECK -eq 0 ] && echo "CS2 is UP" || echo "CS2 is DOWN"
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop|status|restart}"
+		exit 1
+		;;
+esac
+
+>>>>>>> 50acd43281b3beb8f856541328800e10fa5da1ae
 exit 0
